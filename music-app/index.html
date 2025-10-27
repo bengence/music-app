@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music App Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="bg-gray-900 text-white">
+    
+    <!-- Initial Login Screen -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+        <div class="max-w-md w-full mx-4">
+            <!-- App Logo/Title -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-purple-600 rounded-full mb-4">
+                    <i class="fas fa-music text-3xl text-white"></i>
+                </div>
+                <h1 class="text-4xl font-bold text-white mb-2">MusicApp</h1>
+                <p class="text-gray-300">Your complete music practice companion</p>
+            </div>
+
+            <!-- Login Card -->
+            <div class="bg-gray-800 rounded-lg shadow-2xl p-8 border border-gray-700">
+                <div class="mb-6">
+                    <h2 id="login-screen-title" class="text-2xl font-bold text-center">Welcome Back</h2>
+                    <p class="text-gray-400 text-center mt-2">Sign in to continue your musical journey</p>
+                </div>
+
+                <!-- Login Form -->
+                <form id="main-login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="main-login-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" id="main-login-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition" required>
+                    </div>
+                    <button type="submit" id="main-login-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- Register Form -->
+                <form id="main-register-form" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="main-register-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" id="main-register-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition" required minlength="6">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                        <input type="password" id="main-register-confirm" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition" required minlength="6">
+                    </div>
+                    <button type="submit" id="main-register-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                        Create Account
+                    </button>
+                </form>
+
+                <!-- Reset Password Form -->
+                <form id="main-reset-form" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="main-reset-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition" required>
+                    </div>
+                    <button type="submit" id="main-reset-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                        Send Reset Link
+                    </button>
+                </form>
+
+                <!-- Form Switchers -->
+                <div class="mt-6 text-center space-y-3">
+                    <div id="login-switchers">
+                        <button type="button" id="switch-to-register" class="text-purple-400 hover:text-purple-300 transition">
+                            Don't have an account? Create one
+                        </button>
+                        <br>
+                        <button type="button" id="switch-to-reset" class="text-sm text-gray-400 hover:text-gray-300 transition">
+                            Forgot your password?
+                        </button>
+                    </div>
+                    <div id="register-switchers" class="hidden">
+                        <button type="button" id="switch-to-login-from-register" class="text-purple-400 hover:text-purple-300 transition">
+                            Already have an account? Sign in
+                        </button>
+                    </div>
+                    <div id="reset-switchers" class="hidden">
+                        <button type="button" id="switch-to-login-from-reset" class="text-purple-400 hover:text-purple-300 transition">
+                            Back to Sign In
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Message Display -->
+                <div id="main-auth-message" class="mt-4 p-3 rounded-lg hidden">
+                    <p id="main-auth-message-text" class="text-sm text-center"></p>
+                </div>
+
+                <!-- Guest Access -->
+                <div class="mt-6 pt-6 border-t border-gray-700">
+                    <button id="guest-access-btn" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium py-3 px-4 rounded-lg transition duration-200">
+                        Continue as Guest
+                    </button>
+                    <p class="text-xs text-gray-500 text-center mt-2">Limited features available without account</p>
+                </div>
+            </div>
+
+            <!-- App Features Preview -->
+            <div class="mt-8 text-center">
+                <h3 class="text-lg font-semibold text-gray-300 mb-4">What's included:</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm text-gray-400">
+                    <div class="flex items-center">
+                        <i class="fas fa-stopwatch text-purple-400 mr-2"></i>
+                        Advanced Metronome
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-sliders-h text-purple-400 mr-2"></i>
+                        Guitar Tuner
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-microphone text-purple-400 mr-2"></i>
+                        Recording Studio
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-robot text-purple-400 mr-2"></i>
+                        AI Music Assistant
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="hidden min-h-screen flex items-center justify-center bg-gray-900">
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-600 rounded-full mb-4 animate-pulse">
+                <i class="fas fa-music text-2xl text-white"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-white mb-2">Loading MusicApp...</h2>
+            <p class="text-gray-400">Preparing your practice session</p>
+        </div>
+    </div>
+
+    <!-- Main Application (Hidden Initially) -->
+    <div id="main-app" class="hidden flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 p-6 flex flex-col">
+            <h1 class="text-2xl font-bold mb-8">MusicApp</h1>
+            <nav class="flex flex-col space-y-2">
+                <a href="#" class="tab active flex items-center p-3 rounded-lg hover:bg-gray-700" data-tab="dashboard">
+                    <i class="fas fa-home mr-3"></i> Dashboard
+                </a>
+                <a href="#" class="tab flex items-center p-3 rounded-lg hover:bg-gray-700" data-tab="tuner">
+                    <i class="fas fa-sliders-h mr-3"></i> Tuner
+                </a>
+                <a href="#" class="tab flex items-center p-3 rounded-lg hover:bg-gray-700" data-tab="metronome">
+                    <i class="fas fa-stopwatch mr-3"></i> Metronome
+                </a>
+                <a href="#" class="tab flex items-center p-3 rounded-lg hover:bg-gray-700" data-tab="recorder">
+                    <i class="fas fa-microphone mr-3"></i> Recorder
+                </a>
+                <a href="#" class="tab flex items-center p-3 rounded-lg hover:bg-gray-700" data-tab="documents">
+                    <i class="fas fa-file-pdf mr-3"></i> Documents
+                </a>
+                <a href="#" class="tab flex items-center p-3 rounded-lg hover:bg-gray-700" data-tab="ai-assistant">
+                    <i class="fas fa-robot mr-3"></i> AI Assistant
+                </a>
+                <a href="#" class="tab flex items-center p-3 rounded-lg hover:bg-gray-700" data-tab="profile">
+                    <i class="fas fa-user mr-3"></i> Profile
+                </a>
+            </nav>
+            <div class="mt-auto">
+                <div id="user-info" class="hidden mb-4 p-3 bg-gray-700 rounded-lg">
+                    <div class="text-sm text-gray-300" id="user-email"></div>
+                </div>
+                <button id="auth-btn" class="flex items-center p-3 rounded-lg hover:bg-gray-700 w-full text-left">
+                    <i class="fas fa-sign-in-alt mr-3"></i> <span id="auth-btn-text">Login</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-10 overflow-y-auto">
+            <!-- Dashboard Content -->
+            <div id="dashboard" class="tab-content active z-10 relative">
+                <h2 class="text-4xl font-extrabold mb-8 text-purple-400">Welcome to Your Practice Hub!</h2>
+                <p class="text-xl text-gray-300 mb-10">Forge your musical skills with powerful, integrated tools designed for artists and professionals.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Metronome Card -->
+                    <div class="bg-gray-800 p-6 rounded-xl border border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/10 transition">
+                        <i class="fas fa-stopwatch text-3xl text-purple-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Metronome</h3>
+                        <p class="text-gray-400">Keep perfect timing with our advanced metronome</p>
+                    </div>
+                    <!-- Tuner Card -->
+                    <div class="bg-gray-800 p-6 rounded-xl border border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/10 transition">
+                        <i class="fas fa-sliders-h text-3xl text-purple-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Guitar Tuner</h3>
+                        <p class="text-gray-400">Tune your guitar with precision</p>
+                    </div>
+                    <!-- Recorder Card -->
+                    <div class="bg-gray-800 p-6 rounded-xl border border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/10 transition">
+                        <i class="fas fa-microphone text-3xl text-purple-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Music Recorder</h3>
+                        <p class="text-gray-400">Record your practice sessions</p>
+                    </div>
+                    <!-- AI Assistant Card -->
+                    <div class="bg-gray-800 p-6 rounded-xl border border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/10 transition">
+                        <i class="fas fa-robot text-3xl text-purple-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">AI Assistant</h3>
+                        <p class="text-gray-400">Get personalized music guidance</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tuner Content -->
+            <div id="tuner" class="tab-content">
+                <h2 class="text-3xl font-bold mb-6">Guitar Tuner</h2>
+                <div class="bg-gray-800 p-8 rounded-lg text-center max-w-md mx-auto">
+                    <p class="text-gray-400 mb-4">Standard Tuning (E A D G B E)</p>
+                    <div class="string-indicators flex justify-around mb-8"></div>
+                    <div class="meter-container relative h-24 mb-4 flex items-end justify-center">
+                        <div class="meter-needle bg-gray-600" id="meterNeedle"></div>
+                        <div class="meter-base"></div>
+                        <div class="absolute bottom-0 left-0 text-xs text-gray-400">♭</div>
+                        <div class="absolute bottom-0 right-0 text-xs text-gray-400">♯</div>
+                        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">0</div>
+                    </div>
+                    <div class="note-display h-40">
+                        <div id="noteName" class="text-6xl font-bold text-purple-400 mb-2">--</div>
+                        <div id="tuningStatus" class="text-lg mb-2">&nbsp;</div>
+                        <div id="frequency" class="text-sm text-gray-400 mb-1">Frequency: --</div>
+                        <div id="targetFrequency" class="text-sm text-gray-400">Target: --</div>
+                    </div>
+                    <button id="tunerStartStopBtn" class="mt-6 w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-4 rounded-full text-lg transition">Start Tuning</button>
+                    <div id="tunerErrorMessage" class="mt-4 text-red-400 min-h-[20px]">&nbsp;</div>
+                </div>
+            </div>
+
+            <!-- Metronome Content -->
+            <div id="metronome" class="tab-content">
+                <h2 class="text-3xl font-bold mb-6">Metronome</h2>
+                <div class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md mx-auto text-center">
+                    <div id="beat-light-container" class="beat-light-container"></div>
+                    <div class="mb-6">
+                        <input type="range" id="tempo-knob" class="knob" min="60" max="200" value="120" step="1">
+                        <div id="bpm-display" class="text-5xl font-bold text-purple-400 mt-4">120</div>
+                    </div>
+                    <div class="flex justify-center mb-6">
+                        <div class="text-2xl text-gray-300">BPM</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-6 text-left">
+                        <div>
+                            <label for="time-signature" class="block text-sm font-medium text-gray-300 mb-2">Time Signature</label>
+                            <select id="time-signature" class="custom-select w-full">
+                                <option value="4/4">4/4</option>
+                                <option value="3/4">3/4</option>
+                                <option value="2/4">2/4</option>
+                                <option value="6/8">6/8</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="subdivision" class="block text-sm font-medium text-gray-300 mb-2">Subdivision</label>
+                            <select id="subdivision" class="custom-select w-full">
+                                <option value="1">Quarter Notes</option>
+                                <option value="2">Eighth Notes</option>
+                                <option value="4">Sixteenth Notes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <fieldset class="border border-gray-600 rounded-lg p-4 mb-6 text-left">
+                        <legend class="text-sm font-medium text-gray-300 px-2">Practice Trainer</legend>
+                        <div class="mb-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="trainer-enabled" class="mr-2">
+                                <span class="text-sm text-gray-300">Enable Auto Tempo Increase</span>
+                            </label>
+                        </div>
+                        <div id="trainer-controls" class="hidden grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="trainer-increment" class="block text-xs text-gray-400 mb-1">Increment (+BPM)</label>
+                                <input type="number" id="trainer-increment" value="5" min="1" max="20" class="custom-input w-full text-sm">
+                            </div>
+                            <div>
+                                <label for="trainer-interval" class="block text-xs text-gray-400 mb-1">Every (count)</label>
+                                <input type="number" id="trainer-interval" value="8" min="1" max="32" class="custom-input w-full text-sm">
+                            </div>
+                            <div class="col-span-2">
+                                <label for="trainer-mode" class="block text-xs text-gray-400 mb-1">Mode</label>
+                                <select id="trainer-mode" class="custom-select w-full text-sm">
+                                    <option value="bars">Per Bars</option>
+                                    <option value="time">Per Seconds</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <button id="metronome-start-stop-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg text-xl transition-all mb-4">Start</button>
+                    <button id="routine-suggest-btn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-4 rounded-lg text-lg transition-all">
+                        <i class="fas fa-magic mr-2"></i>Suggest Practice Routine
+                    </button>
+                    <div id="routine-output" class="mt-4 p-4 text-left bg-gray-700 rounded-lg hidden">
+                        <div id="routine-loading" class="text-center text-yellow-400 hidden">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>Generating routine...
+                        </div>
+                        <div id="routine-content" class="text-sm text-gray-200"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recorder Content -->
+            <div id="recorder" class="tab-content">
+                <h2 class="text-3xl font-bold mb-6">Music Recorder</h2>
+                <div class="bg-gray-800 p-8 rounded-lg text-center max-w-md mx-auto">
+                    <div id="recording-status" class="flex items-center justify-center h-10 mb-6 text-lg font-semibold text-red-400 hidden">
+                        <div class="recorder-dot mr-3"></div>
+                        <span>Recording...</span>
+                        <div id="timer-display" class="ml-3 font-mono">00:00:00</div>
+                    </div>
+
+                    <button id="recorder-start-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-full text-xl transition-all disabled:opacity-50">
+                        <i class="fas fa-microphone mr-2"></i>Start Recording
+                    </button>
+                    <button id="recorder-stop-btn" class="hidden bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-8 rounded-full text-xl transition-all">
+                        <i class="fas fa-stop mr-2"></i>Stop Recording
+                    </button>
+
+                    <div id="recordings-list-container" class="mt-8">
+                        <h3 class="text-lg font-semibold mb-4 text-left">Your Recordings</h3>
+                        <div id="no-recordings" class="text-gray-400 text-center py-4">
+                            No recordings yet. Start your first recording above!
+                        </div>
+                        <ul id="recordings-list" class="space-y-3"></ul>
+                    </div>
+                    <div id="recorder-error-message" class="mt-4 text-red-400 min-h-[20px]">&nbsp;</div>
+                </div>
+            </div>
+
+            <!-- AI Assistant Content -->
+            <div id="ai-assistant" class="tab-content">
+                <h2 class="text-3xl font-bold mb-6">AI Assistant</h2>
+                <div class="bg-gray-800 p-6 rounded-lg h-[70vh] max-h-[700px] flex flex-col">
+                    <div id="chat-messages" class="flex-1 overflow-y-auto mb-4 space-y-4">
+                        <div class="flex chat-ai">
+                            <div class="p-3 rounded-xl max-w-xs md:max-w-lg bg-purple-600 text-white rounded-tl-none">
+                                Hello! I'm your AI music assistant. Ask me about music theory, practice techniques, or anything music-related!
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="chat-input-area" class="flex items-center">
+                        <input type="text" id="chat-input" placeholder="Ask me about music..." 
+                               class="flex-1 bg-gray-700 border border-gray-600 rounded-l-lg px-4 py-2 text-white focus:outline-none focus:border-purple-500">
+                        <button id="chat-send-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-r-lg transition-colors">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div id="gemini-status" class="text-xs text-yellow-400 mt-2 min-h-[16px]">Ready to assist.</div>
+                </div>
+            </div>
+
+            <!-- Documents Content -->
+            <div id="documents" class="tab-content">
+                <h2 class="text-3xl font-bold mb-6">Reference Documents</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Document 1: Major Scales -->
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700/50 flex items-center space-x-4 hover:border-purple-500 transition">
+                        <i class="fas fa-music text-2xl text-purple-400"></i>
+                        <div>
+                            <h3 class="font-semibold">Major Scales</h3>
+                            <p class="text-sm text-gray-400">Complete reference guide</p>
+                        </div>
+                    </div>
+                    <!-- Document 2: Minor Scales & Modes -->
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700/50 flex items-center space-x-4 hover:border-purple-500 transition">
+                        <i class="fas fa-music text-2xl text-purple-400"></i>
+                        <div>
+                            <h3 class="font-semibold">Minor Scales & Modes</h3>
+                            <p class="text-sm text-gray-400">Explore different musical modes</p>
+                        </div>
+                    </div>
+                    <!-- Document 3: Common Chord Progressions -->
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700/50 flex items-center space-x-4 hover:border-purple-500 transition">
+                        <i class="fas fa-music text-2xl text-purple-400"></i>
+                        <div>
+                            <h3 class="font-semibold">Common Chord Progressions</h3>
+                            <p class="text-sm text-gray-400">Popular progressions in music</p>
+                        </div>
+                    </div>
+                    <!-- Document 4: The Circle of Fifths -->
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700/50 flex items-center space-x-4 hover:border-purple-500 transition">
+                        <i class="fas fa-music text-2xl text-purple-400"></i>
+                        <div>
+                            <h3 class="font-semibold">The Circle of Fifths</h3>
+                            <p class="text-sm text-gray-400">Key relationships made simple</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div id="profile" class="tab-content">
+                <h2 class="text-3xl font-bold mb-6">Profile Settings</h2>
+                <div class="max-w-2xl mx-auto">
+                    <div id="profile-authenticated" class="hidden">
+                        <div class="bg-gray-800 p-6 rounded-lg mb-6">
+                            <h3 class="text-xl font-semibold mb-4">Account Information</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                                    <input type="email" id="profile-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Member Since</label>
+                                    <input type="text" id="profile-created" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-800 p-6 rounded-lg mb-6">
+                            <h3 class="text-xl font-semibold mb-4">Change Password</h3>
+                            <form id="change-password-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+                                    <input type="password" id="new-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required minlength="6">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
+                                    <input type="password" id="confirm-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required minlength="6">
+                                </div>
+                                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                                    Update Password
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="bg-gray-800 p-6 rounded-lg mb-6">
+                            <h3 class="text-xl font-semibold mb-4">Practice Statistics</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-gray-700 p-4 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-purple-400" id="total-sessions">0</div>
+                                    <div class="text-sm text-gray-400">Practice Sessions</div>
+                                </div>
+                                <div class="bg-gray-700 p-4 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-purple-400" id="total-recordings">0</div>
+                                    <div class="text-sm text-gray-400">Recordings</div>
+                                </div>
+                                <div class="bg-gray-700 p-4 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-purple-400" id="total-time">0h</div>
+                                    <div class="text-sm text-gray-400">Practice Time</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-800 p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 text-red-400">Danger Zone</h3>
+                            <button id="delete-account-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                                Delete Account
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="profile-unauthenticated" class="text-center">
+                        <div class="bg-gray-800 p-8 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4">Please Login</h3>
+                            <p class="text-gray-400 mb-6">You need to be logged in to view your profile and settings.</p>
+                            <button id="profile-login-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                                Login / Register
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- End Main Application -->
+
+    <!-- Authentication Modals (for logged-in users) -->
+    <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 p-8 rounded-lg w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="auth-modal-title" class="text-2xl font-bold">Login</h2>
+                <button id="close-auth-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <input type="email" id="login-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <input type="password" id="login-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required>
+                </div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                    Login
+                </button>
+                <div class="text-center">
+                    <button type="button" id="show-register" class="text-purple-400 hover:text-purple-300">
+                        Don't have an account? Register
+                    </button>
+                </div>
+                <div class="text-center">
+                    <button type="button" id="forgot-password" class="text-sm text-gray-400 hover:text-gray-300">
+                        Forgot Password?
+                    </button>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <input type="email" id="register-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <input type="password" id="register-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required minlength="6">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                    <input type="password" id="register-confirm-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required minlength="6">
+                </div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                    Register
+                </button>
+                <div class="text-center">
+                    <button type="button" id="show-login" class="text-purple-400 hover:text-purple-300">
+                        Already have an account? Login
+                    </button>
+                </div>
+            </form>
+
+            <!-- Reset Password Form -->
+            <form id="reset-form" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <input type="email" id="reset-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white" required>
+                </div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                    Send Reset Link
+                </button>
+                <div class="text-center">
+                    <button type="button" id="back-to-login" class="text-purple-400 hover:text-purple-300">
+                        Back to Login
+                    </button>
+                </div>
+            </form>
+
+            <div id="auth-message" class="mt-4 p-3 rounded-lg hidden">
+                <p id="auth-message-text"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/login-screen.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/database.js"></script>
+    <script src="assets/js/metronome.js"></script>
+    <script src="assets/js/tuner.js"></script>
+    <script src="assets/js/recorder.js"></script>
+    <script src="assets/js/chat.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
